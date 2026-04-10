@@ -21,5 +21,9 @@ public class CacheService {
     public void addProduct(ProductEntity product){
         hashOperations.put("Products",product.getId(), product);
     }
+    public void deleteProduct(Long id){
+        hashOperations.delete("Products", id);
+    }
+
 
 }

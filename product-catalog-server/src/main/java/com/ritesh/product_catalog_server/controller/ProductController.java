@@ -47,6 +47,7 @@ public class ProductController {
             @PathVariable Long id,
             @RequestBody ProductEntity product) {
 
+        product.setId(id);
         ProductEntity updatedProduct = productService.updateProduct(product);
 
         Map<String, Object> response = new HashMap<>();

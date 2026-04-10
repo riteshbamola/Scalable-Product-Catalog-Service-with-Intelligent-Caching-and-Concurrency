@@ -1,8 +1,11 @@
 package com.ritesh.product_catalog_server.service;
 
+import com.ritesh.product_catalog_server.RabitMQ.Producer;
 import com.ritesh.product_catalog_server.db.ProductEntity;
 import com.ritesh.product_catalog_server.db.ProductRepo;
 import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -14,15 +17,21 @@ public class ProductService {
 
     private ProductRepo productRepo;
     private CacheService cacheService;
+    private Producer producer;
 
-    ProductService(ProductRepo productRepo, CacheService cacheService) {
+    ProductService(ProductRepo productRepo, CacheService cacheService, Producer producer) {
         this.productRepo = productRepo;
         this.cacheService = cacheService;
+        this.producer=producer;
     }
+
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
+
 
     public ProductEntity getProduct(Long id){
         ProductEntity product = cacheService.getProduct(id);
-        System.out.println("Cache Value: "+ product);
+        System.out.println("Cache  Value: "+ product);
 
         return  product != null ? product:productRepo.findById(id).orElseThrow(()-> new RuntimeException("Product Not Found"));
     }
@@ -38,6 +47,8 @@ public class ProductService {
         ProductEntity productEntity = productRepo.findById(product.getId()).orElseThrow(()-> new RuntimeException("Not Found"));
         productEntity.setPrice(product.getPrice());
         productEntity = productRepo.save(productEntity);
+        System.out.println("From db  price = :"+ productEntity.getPrice());
+        eventPublisher.publishEvent(productEntity);
         return productEntity;
     }
 

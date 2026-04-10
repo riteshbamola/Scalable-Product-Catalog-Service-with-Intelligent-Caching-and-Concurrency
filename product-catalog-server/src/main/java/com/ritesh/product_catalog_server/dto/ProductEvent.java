@@ -1,4 +1,10 @@
 package com.ritesh.product_catalog_server.dto;
 
-public record ProductEvent() {
-}
+import java.math.BigDecimal;
+
+public record ProductEvent(
+        Long id,
+        String name,
+        BigDecimal price,
+        Integer stockQuantity
+) {}
